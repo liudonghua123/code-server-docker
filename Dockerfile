@@ -3,6 +3,9 @@ FROM codercom/code-server
 # https://docs.docker.com/reference/dockerfile/#maintainer-deprecated
 LABEL org.opencontainers.image.authors="liudonghua@ynu.edu.cn"
 
+# use .bash_profile instead of .bashrc
+# see also https://unix.stackexchange.com/questions/257571/why-does-bashrc-check-whether-the-current-shell-is-interactive
+# and https://askubuntu.com/questions/40287/why-is-etc-profile-not-being-loaded-during-non-login-bash-shell-sessions
 ENV PROFILE=/home/coder/.bash_profile
 # create if not exists
 RUN touch $PROFILE
@@ -39,9 +42,13 @@ RUN . $PROFILE && pyenv install 3.12
 RUN sudo apt install -y vim python-is-python3
 
 # other config
-RUN echo '[ -s "$HOME/.bash_profile" ] && . $HOME/.bash_profile # load $HOME/.bash_profile' >> ~/.bashrc
-RUN echo 'nvm use 20 1>/dev/null' >> ~/.bashrc
-RUN echo 'pyenv global 3.12' >> ~/.bashrc
+RUN echo >> $HOME/.bashrc
+RUN echo "[ -s \"$PROFILE\" ] && . $PROFILE # load $PROFILE" >> $HOME/.bashrc
+RUN echo 'nvm use 20 1>/dev/null' >> $HOME/.bashrc
+RUN echo 'pyenv global 3.12' >> $HOME/.bashrc
+
+# install cnpm
+RUN . $PROFILE && nvm use 20 && npm install cnpm -g --registry=https://registry.npmmirror.com
 
 # cleanup
 RUN sudo rm -rf /var/lib/apt/lists/*

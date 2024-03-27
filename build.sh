@@ -1,0 +1,1 @@
+docker build --progress plain -t liudonghua123/code-server .
